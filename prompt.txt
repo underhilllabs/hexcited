@@ -13,6 +13,9 @@ BASELINE REQUIREMENTS
 - collectible mini pumpkins (instead of coins) with a score counter
 - a start screen with intructions
 - Smooth 60fps movement
+- there will be multiple levels in this game:
+  - level 1: Hexie the cat is trying to rescure his friend Wendy the Witch (Wendy is a short witch with an oversized witch hat and red and white striped socks
+  - level 2: guide Hexie and Wendy flying on Wendy's broomstick as they avoid ducks flying in formation and collect pumpkins. fly in one direction only but can slow down and speed up and fly upwards or downwards. At the end of level 2 is a giant rainbow.
 
 NOW GO ABOVE AND BEYOND - this is the baseline, not the goal. Treat this like a a portfolio piece you are proud of.
 - Background music and sound effects, all synthesized with the Web Audio API (jump, collect pumpkin, stomp, hurt, win)
@@ -24,4 +27,4 @@ The jump should feel satisfying and the whole style should feel alive.
 
 The goal of the game is for Hexie to save his Witch friend who is being held by the bad guys: the Church of Good Manners
 
-
+T
