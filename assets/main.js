@@ -35,6 +35,7 @@
       this.finaleT = 0;
       this.flash = 0;
       this.ambientT = 0;
+      this.bg = 1;          // which backdrop to draw on non-playing screens (1 or 2)
 
       Hex.Input.init();
       this._bindUI();
@@ -96,6 +97,7 @@
       this.cam.snapTo(this.player.x - VIEW_W / 2, 0);
       this.particles.clear();
       this.state = STATE.L1;
+      this.bg = 1;
       this.deathTimer = 0;
       this.hide("start"); this.hide("transition"); this.hide("win");
       this.hide("gameover"); this.hide("pause");
@@ -123,10 +125,12 @@
     beginLevel2() {
       this.level = L.buildLevel2();
       this.broom = new Hex.Broom(180, VIEW_H / 2 - 15);
+      this.player = null;   // we're on the broom now — no on-foot cat to render
       this.cam.setBounds(0, 0, Infinity, VIEW_H);
       this.cam.snapTo(0, 0);
       this.particles.clear();
       this.state = STATE.L2;
+      this.bg = 2;
       this.finaleT = 0;
       this.hide("start"); this.hide("transition"); this.hide("win");
       this.hide("gameover"); this.hide("pause");
@@ -403,6 +407,8 @@
       else if (this.state === STATE.L2 || this.state === STATE.FINALE) this.renderL2();
       else if (this.state === STATE.START) this.renderMenuBackdrop();
       else if (this.state === STATE.TRANSITION) this.renderL1();
+      // Paused / game-over / win: draw the backdrop of the level we're on.
+      else if (this.bg === 2) this.renderL2();
       else this.renderL1IfPossible();
 
       // white flash (finale / impacts)

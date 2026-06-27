@@ -1,0 +1,12 @@
+{
+  "name": "hexcited",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hexcited — Hexie's Rescue, a 2D platformer.",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1"
+  }
+}
