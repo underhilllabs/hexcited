@@ -10,6 +10,12 @@ browser via the Web Audio API.
 > graveyard — then take to the skies on Wendy's broom and soar over the rainbow
 > to freedom.
 
+
+## Level 2 screenshot
+
+<img width="2509" height="1236" alt="image" src="https://github.com/user-attachments/assets/f1d7613d-ed73-4c33-be8f-812d6afca7c2" />
+
+
 ## Gameplay
 
 The game has two distinct levels:
