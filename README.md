@@ -10,6 +10,9 @@ browser via the Web Audio API.
 > graveyard — then take to the skies on Wendy's broom and soar over the rainbow
 > to freedom.
 
+## Level 1: the Graveyard
+<img width="1364" height="790" alt="image" src="https://github.com/user-attachments/assets/13f01733-6da8-4009-b9cb-87ed9e98c80b" />
+
 
 ## Level 2 screenshot
 
