@@ -11,7 +11,9 @@ browser via the Web Audio API.
 > to freedom.
 
 ## Level 1: the Graveyard
-<img width="1364" height="790" alt="image" src="https://github.com/user-attachments/assets/13f01733-6da8-4009-b9cb-87ed9e98c80b" />
+
+<img width="2509" height="1236" alt="image" src="https://github.com/user-attachments/assets/caf26779-7c54-4d81-90eb-e42a30098630" />
+
 
 
 ## Level 2 screenshot
