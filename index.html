@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Hexie and the Church of Good Manners</title>
+    <link rel="stylesheet" href="assets/style.css">
+  </head>
+  <body>
+    <main class="game-shell" aria-label="Hexie side-scrolling platform game">
+      <div class="game-frame">
+        <canvas id="game" width="960" height="540" aria-label="Hexie platformer game screen"></canvas>
+        <div class="hud" aria-live="polite">
+          <div class="hud-item"><span class="pumpkin-dot"></span><span id="score">0</span></div>
+          <div class="hud-item">Lives <span id="lives">3</span></div>
+          <button id="muteButton" class="icon-button" type="button" aria-label="Toggle sound" title="Toggle sound">Sound</button>
+        </div>
+        <section id="overlay" class="overlay">
+          <div class="overlay-panel">
+            <p class="kicker">A moonlit rescue</p>
+            <h1>Hexie</h1>
+            <p id="overlayText">
+              Run, jump, collect mini pumpkins, rescue Wendy, then fly the broomstick to the rainbow.
+            </p>
+            <p class="controls">
+              Arrow keys or WASD to move. Space or W jumps in level 1 and rises in level 2. Enter starts. P pauses. M mutes.
+            </p>
+            <button id="startButton" type="button">Start</button>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script src="assets/game.js"></script>
+  </body>
+</html>

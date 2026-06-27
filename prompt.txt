@@ -1,0 +1,27 @@
+
+create a complete, polished 2D side-scrolling platformer game (Mario-style_ as a single self-contained HTML file.
+
+Put the CSS and Javascript in a separate assets folder.
+
+The main character is a black cat. The players play as a black cat named Hexie.
+
+BASELINE REQUIREMENTS
+- player runs left/right (arrow keys / WASD) and jumps (spacebar) with smooth gravity and acceleration.
+- Solid platforms and ground with reliable collision - the player must never clip through floors or walls
+- a camera that smoothly scrolls to follow the player
+- at least one enemy you defeat my jumping on it, that hurts you on side contact
+- collectible mini pumpkins (instead of coins) with a score counter
+- a start screen with intructions
+- Smooth 60fps movement
+
+NOW GO ABOVE AND BEYOND - this is the baseline, not the goal. Treat this like a a portfolio piece you are proud of.
+- Background music and sound effects, all synthesized with the Web Audio API (jump, collect pumpkin, stomp, hurt, win)
+- rich character animation (idle / run/ jump frames)
+- particle effects, screen shake and juicy game feel on every hit and jump
+- a parallax, layered atmospheric background and a cohesive art style.
+
+The jump should feel satisfying and the whole style should feel alive.
+
+The goal of the game is for Hexie to save his Witch friend who is being held by the bad guys: the Church of Good Manners
+
+
