@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hexcited — Hexie's Rescue</title>
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <div id="stage">
+    <canvas id="game" width="960" height="540"></canvas>
+
+    <!-- In-game HUD -->
+    <div id="hud" class="hidden">
+      <div class="hud-item" id="hud-score"><span class="hud-icon">✦</span><span id="score-val">0</span></div>
+      <div class="hud-item" id="hud-pumpkins"><span class="hud-icon">🎃</span><span id="pumpkin-val">0</span></div>
+      <div class="hud-item" id="hud-hearts"></div>
+      <div class="hud-item hud-level" id="hud-level">Level 1</div>
+    </div>
+
+    <!-- Start screen -->
+    <div id="start" class="overlay">
+      <div class="panel">
+        <h1 class="title">Hex<span class="accent">cited</span></h1>
+        <p class="subtitle">Hexie's Rescue</p>
+        <p class="story">
+          The <em>Church of Good Manners</em> has captured <strong>Wendy the Witch</strong>.
+          Only her loyal black cat <strong>Hexie</strong> can save her. Run, leap, and
+          stomp through the moonlit graveyard — then take to the skies on Wendy's broom.
+        </p>
+        <div class="controls">
+          <div class="ctrl-col">
+            <h3>On Foot</h3>
+            <p><kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd> &nbsp;Move</p>
+            <p><kbd>Space</kbd> &nbsp;Jump (hold to jump higher)</p>
+            <p>Stomp enemies from above!</p>
+          </div>
+          <div class="ctrl-col">
+            <h3>On the Broom</h3>
+            <p><kbd>↑</kbd><kbd>↓</kbd> / <kbd>W</kbd><kbd>S</kbd> &nbsp;Steer</p>
+            <p><kbd>Space</kbd> &nbsp;Speed up &nbsp;·&nbsp; <kbd>Shift</kbd> Slow</p>
+            <p>Dodge the ducks, grab pumpkins!</p>
+          </div>
+        </div>
+        <p class="hint mute-hint"><kbd>M</kbd> mute · <kbd>P</kbd> pause · <kbd>1</kbd>/<kbd>2</kbd> jump to a level anytime</p>
+        <button class="btn" id="start-btn">Press <kbd>Enter</kbd> to Begin</button>
+      </div>
+    </div>
+
+    <!-- Level transition card -->
+    <div id="transition" class="overlay hidden">
+      <div class="panel small">
+        <h2 id="transition-title">Wendy is Free!</h2>
+        <p id="transition-text">Hop on the broom — fly to the rainbow and escape!</p>
+        <button class="btn" id="transition-btn">Continue</button>
+      </div>
+    </div>
+
+    <!-- Win screen -->
+    <div id="win" class="overlay hidden">
+      <div class="panel">
+        <h1 class="title win-title">You Did It!</h1>
+        <p class="subtitle">Hexie &amp; Wendy soared over the rainbow to freedom.</p>
+        <div class="tally" id="win-tally"></div>
+        <button class="btn" id="win-btn">Play Again</button>
+      </div>
+    </div>
+
+    <!-- Game over screen -->
+    <div id="gameover" class="overlay hidden">
+      <div class="panel small">
+        <h1 class="title lose-title">Caught!</h1>
+        <p class="subtitle">The Church of Good Manners got the better of Hexie...</p>
+        <button class="btn" id="gameover-btn">Try Again</button>
+      </div>
+    </div>
+
+    <!-- Pause veil -->
+    <div id="pause" class="overlay hidden">
+      <div class="panel small">
+        <h2>Paused</h2>
+        <p class="hint">Press <kbd>P</kbd> to resume</p>
+      </div>
+    </div>
+
+    <div id="scanlines" aria-hidden="true"></div>
+    <div id="vignette" aria-hidden="true"></div>
+  </div>
+
+  <script src="assets/audio.js"></script>
+  <script src="assets/engine.js"></script>
+  <script src="assets/entities.js"></script>
+  <script src="assets/levels.js"></script>
+  <script src="assets/main.js"></script>
+</body>
+</html>
