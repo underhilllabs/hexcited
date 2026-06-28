@@ -1,0 +1,87 @@
+GAME-BUILDING CAPABILITY TEST — FIXED SPEC ("Hexie's Rescue")
+
+You are building a complete, polished 2D side-scrolling platformer game
+(Mario-style) that runs in a web browser. Implement the exact game described
+below so the result can be compared directly against a reference build. Treat
+this like a portfolio piece you are proud of — the requirements are the floor,
+not the goal.
+
+============================================================
+STACK & DELIVERY CONSTRAINTS (non-negotiable)
+============================================================
+- Vanilla HTML5 Canvas + JavaScript + CSS only.
+- NO frameworks, NO game engines, NO libraries, NO CDN scripts. Zero external
+  network requests at runtime.
+- NO binary or external asset files: no .png/.jpg/.svg/.mp3/.wav/.ogg/.woff.
+  All art is drawn in code on the canvas. All music and sound effects are
+  synthesized live with the Web Audio API.
+- It must run by serving the folder statically over http:// (e.g.
+  `python3 -m http.server`) and opening index.html. No build step, no bundler,
+  no npm install required to play.
+- Put markup in index.html and split the CSS and JavaScript into an assets/
+  folder (e.g. style.css plus a few logically separated .js files). Attach code
+  to a single global namespace.
+
+============================================================
+THE GAME
+============================================================
+Title: "Hexcited — Hexie's Rescue".
+Story: The Church of Good Manners has captured Wendy the Witch — a short witch
+with an oversized witch hat and red-and-white striped socks. Her loyal black
+cat, Hexie (the player character), must rescue her.
+
+CORE MECHANICS (on foot)
+- Run left/right with Arrow keys / WASD and jump with Spacebar.
+- Smooth gravity and acceleration; variable jump height (hold to jump higher).
+- A jump that feels satisfying — include coyote time and a short jump buffer.
+- Solid platforms and ground with reliable AABB collision. The player must
+  NEVER clip through floors or walls or fall through a platform.
+- A camera that smoothly scrolls to follow the player.
+- At least one enemy you defeat by jumping on it (stomp) that hurts you on side
+  contact.
+- Collectible mini pumpkins (instead of coins) with an on-screen score counter.
+- A lives/health system with a hurt state, a game-over screen, and restart.
+- Smooth, frame-rate-independent 60fps movement (fixed-timestep loop).
+
+LEVELS — implement all three:
+- Level 1 — Graveyard Run: a classic side-scroller through a moonlit graveyard.
+  Hexie runs, jumps, stomps "churchfolk" enemies, collects pumpkins, and
+  reaches Wendy to rescue her.
+- Level 2 — Broom Flight: Hexie and Wendy fly on Wendy's broom. Auto-forward in
+  one direction; the player steers up/down and speeds up/slows down to dodge
+  ducks flying in formation while collecting pumpkins. The level ends at a giant
+  rainbow.
+- Level 3 — The Climb & The Nest: a vertical climb up a giant tree, hopping
+  branch to branch while swoop birds dive in arcing attacks (stomp or dodge).
+  Reaching the nest triggers a boss duel against a giant bird — dodge its swoops
+  and stomp its head three times while it perches to win Wendy's freedom.
+
+SCREENS & FLOW
+- A start screen with instructions; level-transition screens; a win screen; a
+  game-over screen; and a pause screen. Enter/continue, mute (M), and pause (P).
+
+GO ABOVE AND BEYOND (expected, not optional)
+- Synthesized background music and SFX for jump, collect pumpkin, stomp, hurt,
+  and win.
+- Rich character animation: distinct idle / run / jump frames, with squash and
+  stretch.
+- Particle effects, screen shake, and juicy game feel on every jump, stomp, and
+  hit.
+- A parallax, layered, atmospheric background and a cohesive art style that
+  feels alive.
+
+============================================================
+DEFINITION OF DONE — verify before you finish
+============================================================
+Self-check and report the result of each item. Do not claim a feature that is
+not actually working in the running game.
+- [ ] Loads over http:// with an empty browser console (no errors/warnings).
+- [ ] No external network requests; no external asset files.
+- [ ] All three levels are completable end to end; the win state is reachable.
+- [ ] Stomping straight into floors/walls/ceilings never clips the player.
+- [ ] Death leads to a working restart with no page reload and no broken state.
+- [ ] Every "above and beyond" item above is implemented and functional.
+
+If you must cut any requirement, state explicitly what you cut and why. End your
+response with a short list of the acceptance checks above and whether each
+passed.
