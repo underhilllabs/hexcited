@@ -1,0 +1,66 @@
+GAME-BUILDING CAPABILITY TEST — OPEN CREATIVE BRIEF
+
+Build a complete, polished 2D side-scrolling platformer game (Mario-style) that
+runs in a web browser. The theme, characters, world, and story are YOURS to
+invent — surprise us with taste and a strong point of view. Treat this like a
+portfolio piece you are proud of. The requirements below are the floor, not the
+goal.
+
+============================================================
+STACK & DELIVERY CONSTRAINTS (non-negotiable)
+============================================================
+- Vanilla HTML5 Canvas + JavaScript + CSS only.
+- NO frameworks, NO game engines, NO libraries, NO CDN scripts. Zero external
+  network requests at runtime.
+- NO binary or external asset files: no .png/.jpg/.svg/.mp3/.wav/.ogg/.woff.
+  All art is drawn in code on the canvas. All music and sound effects are
+  synthesized live with the Web Audio API.
+- It must run by serving the folder statically over http:// and opening
+  index.html. No build step, no bundler, no install required to play.
+- Put markup in index.html and split CSS and JavaScript into an assets/ folder.
+
+============================================================
+BASELINE REQUIREMENTS (must all be present and functional)
+============================================================
+- A player character that runs left/right (Arrow keys / WASD) and jumps
+  (Spacebar) with smooth gravity, acceleration, and a satisfying variable-height
+  jump (include coyote time and a jump buffer).
+- Solid platforms and ground with reliable AABB collision — the player must
+  NEVER clip through floors or walls.
+- A camera that smoothly scrolls to follow the player.
+- At least one enemy you defeat by jumping on it that hurts you on side contact.
+- A collectible with an on-screen score counter.
+- A lives/health system, a hurt state, a game-over screen, and restart.
+- A start screen with instructions, a win screen, and a pause screen.
+- Smooth, frame-rate-independent 60fps movement (fixed-timestep loop).
+- AT LEAST THREE distinct levels or stages. At least one of them should change
+  the core mechanic in a meaningful way (e.g. a flight/swim/climb stage), not
+  just re-skin level 1.
+
+============================================================
+GO ABOVE AND BEYOND (this is where you differentiate yourself)
+============================================================
+- Synthesized background music and SFX (at minimum: jump, collect, defeat,
+  hurt, win).
+- Rich character animation (idle / run / jump) with squash and stretch.
+- Particle effects, screen shake, and juicy game feel on every jump, hit, and
+  collect.
+- A parallax, layered, atmospheric background and a cohesive art style.
+- A memorable hook: an original mechanic, a boss, a twist, a mood. Make a choice
+  and commit to it. The world should feel alive and intentional, not templated.
+
+============================================================
+DEFINITION OF DONE — verify before you finish
+============================================================
+Self-check and report each item. Do not claim a feature that is not actually
+working in the running game.
+- [ ] Loads over http:// with an empty browser console.
+- [ ] No external network requests; no external asset files.
+- [ ] Every level is completable end to end; the win state is reachable.
+- [ ] Driving the player into floors/walls/ceilings never clips it.
+- [ ] Death leads to a working restart with no page reload.
+- [ ] Every "above and beyond" item you claim is implemented and functional.
+
+If you cut any requirement, say so explicitly and why. End your response with the
+acceptance checklist above and whether each item passed, plus 2–3 sentences on
+the creative direction you chose and why.
