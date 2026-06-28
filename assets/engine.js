@@ -47,6 +47,7 @@
       KeyM: "mute", KeyP: "pause",
       Digit1: "level1", Numpad1: "level1",
       Digit2: "level2", Numpad2: "level2",
+      Digit3: "level3", Numpad3: "level3",
     },
 
     init() {

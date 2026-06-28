@@ -7,8 +7,8 @@ browser via the Web Audio API.
 
 > The **Church of Good Manners** has captured **Wendy the Witch**. Only her loyal
 > black cat, **Hexie**, can save her. Run, leap, and stomp through the moonlit
-> graveyard — then take to the skies on Wendy's broom and soar over the rainbow
-> to freedom.
+> graveyard, take to the skies on Wendy's broom and soar over the rainbow — then
+> climb the great tree and face the giant bird guarding its nest.
 
 
 ## Level 2 screenshot
@@ -18,7 +18,7 @@ browser via the Web Audio API.
 
 ## Gameplay
 
-The game has two distinct levels:
+The game has three distinct stages:
 
 - **Level 1 — Graveyard Run.** A classic Mario-style side-scroller. Run and jump
   through a moonlit graveyard, stomp enemies from above, collect mini pumpkins,
@@ -26,6 +26,12 @@ The game has two distinct levels:
 - **Level 2 — Broom Flight.** A one-way auto-flight stage. Steer Wendy's broom up
   and down, speed up or slow down to dodge ducks flying in formation, grab more
   pumpkins, and race toward a giant rainbow at the end.
+- **Level 3 — The Climb & The Nest.** A vertical climb up a giant tree: hop
+  branch to branch toward the top while **swoop birds** nesting along the way
+  dive at Hexie in arcing attacks — stomp them or dodge their swoops. Reaching
+  the nest at the summit triggers a boss duel against the **giant bird**: dodge
+  its swoops and stomp its head three times while it perches to win Wendy's
+  freedom for good.
 
 ## Controls
 
@@ -37,7 +43,7 @@ The game has two distinct levels:
 | Speed up / slow down (broom) | `Space` / `Shift` |
 | Mute | `M` |
 | Pause | `P` |
-| Jump to a level | `1` / `2` |
+| Jump to a level | `1` / `2` / `3` |
 | Start / continue | `Enter` |
 
 Stomp enemies from above to defeat them; touching them from the side hurts you.
@@ -50,6 +56,8 @@ Stomp enemies from above to defeat them; touching them from the side hurts you.
 - Layered parallax atmospheric backgrounds and a cohesive art style
 - Rich character animation (idle / run / jump)
 - Particle effects, screen shake, and juicy game feel on every jump, stomp, and hit
+- Distinct enemies per stage — patrolling churchfolk, formation-flying ducks,
+  arcing swoop birds, and a multi-hit giant-bird boss
 - Fully synthesized music and SFX (jump, collect, stomp, hurt, win) — no audio assets
 - Start, level-transition, win, game-over, and pause screens
 
@@ -73,7 +81,7 @@ assets/
   audio.js              # Web Audio API music and sound-effect synthesis
   engine.js             # Math utils, input, camera, collision, particles, game loop
   entities.js           # Player, enemies, pumpkins, and other game objects
-  levels.js             # Level 1/2 layouts and parallax backgrounds
+  levels.js             # Level 1/2/3 layouts and parallax backgrounds
   main.js               # Game state, screen flow, and wiring it all together
 prompt.txt              # The original design brief for the game
 tests/                  # Playwright browser tests

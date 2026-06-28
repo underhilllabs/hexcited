@@ -765,4 +765,402 @@
     }
   }
   Hex.Duck = Duck;
+
+  /* ===================== LEVEL 3a: SWOOP BIRD ========================== */
+  // A small bird that nests beside the climb and periodically dives in a
+  // downward arc to swipe at Hexie, then loops back up to its perch. Side
+  // contact hurts; stomp it from above to pop it (same rules as Churchfolk).
+  class SwoopBird {
+    constructor(x, y, opts) {
+      opts = opts || {};
+      this.w = 26; this.h = 18;
+      this.homeX = x; this.homeY = y;
+      this.x = x; this.y = y;
+      this.range = opts.range != null ? opts.range : 430;   // trigger radius
+      this.maxDepth = opts.depth != null ? opts.depth : 190; // dive distance
+      this.face = opts.face != null ? opts.face : 1;         // perched facing
+      this.dead = false;
+      this.squish = 0;
+      this.vy = 0;
+      this.state = "perch";      // perch | dive | return
+      this.cooldown = M.rand(0.8, 2.2);
+      this.t = 0;
+      this.dir = -1;
+      this.flap = M.rand(0, 6);
+      this.bob = M.rand(0, Math.PI * 2);
+      this.arcW = 200; this.depth = this.maxDepth;
+      this.fromX = x; this.fromY = y;
+    }
+    update(dt, solids, game) {
+      if (this.dead) {                 // popped — tumble away
+        this.vy += 1800 * dt;
+        this.y += this.vy * dt;
+        return;
+      }
+      this.flap += dt * 20;
+      const p = game.player;
+
+      if (this.state === "perch") {
+        this.bob += dt * 3;
+        this.x = this.homeX;
+        this.y = this.homeY + Math.sin(this.bob) * 4;
+        this.cooldown -= dt;
+        if (this.cooldown <= 0 && p && !p.dead) {
+          const dx = p.cx - (this.x + this.w / 2);
+          const dy = p.y - this.y;
+          if (Math.abs(dx) < this.range && dy > -60 && dy < this.range) {
+            this.state = "dive";
+            this.t = 0;
+            this.dir = dx >= 0 ? 1 : -1;
+            this.fromX = this.x; this.fromY = this.y;
+            this.arcW = M.clamp(Math.abs(dx) + 70, 120, 300);
+            this.depth = M.clamp(dy + 40, 90, this.maxDepth);
+            A.swoop();
+          }
+        }
+      } else if (this.state === "dive") {
+        // parametric down-and-up arc, returning to perch altitude
+        this.t = Math.min(1, this.t + dt * 1.5);
+        this.x = this.fromX + this.dir * this.arcW * this.t;
+        this.y = this.fromY + Math.sin(this.t * Math.PI) * this.depth;
+        if (this.t >= 1) {
+          this.state = "return";
+          this.t = 0;
+          this.fromX = this.x; this.fromY = this.y;
+        }
+      } else {                          // return — ease back to the perch
+        this.t = Math.min(1, this.t + dt * 0.9);
+        const k = this.t * this.t * (3 - 2 * this.t);   // smoothstep
+        this.x = M.lerp(this.fromX, this.homeX, k);
+        this.y = M.lerp(this.fromY, this.homeY, k);
+        if (this.t >= 1) {
+          this.state = "perch";
+          this.cooldown = M.rand(1.4, 3.0);
+        }
+      }
+    }
+    stomp(game) {
+      this.dead = true;
+      this.vy = -260;
+      this.squish = 1;
+      A.stomp();
+      game.cam.addShake(0.3);
+      game.addScore(120, this.x + this.w / 2, this.y);
+      game.particles.burst(this.x + this.w / 2, this.y + this.h / 2, 16, {
+        color: ["#9a8cff", "#d8c8ff", "#fff", "#5a4a8a"], speedMin: 60, speedMax: 220,
+        lifeMin: 0.3, lifeMax: 0.7, glow: true, g: 500,
+      });
+    }
+    draw(ctx) {
+      const cx = this.x + this.w / 2;
+      const cy = this.y + this.h / 2;
+      ctx.save();
+      ctx.translate(cx, cy);
+      if (this.dead) {
+        this.squish = Math.max(0, this.squish - 0.04);
+        ctx.globalAlpha = this.squish;
+        ctx.scale(this.dir < 0 ? -1 : 1, 1);
+        ctx.rotate(0.7);
+      } else {
+        const facing = this.state === "perch" ? this.face : this.dir;
+        ctx.scale(facing, 1);
+        // nose-down tilt through the dive
+        if (this.state === "dive") ctx.rotate(Math.sin(this.t * Math.PI) * 0.5);
+      }
+      // body
+      ctx.fillStyle = "#3a2c5c";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 11, 7, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // head
+      ctx.beginPath();
+      ctx.arc(8, -3, 5, 0, Math.PI * 2);
+      ctx.fill();
+      // beak
+      ctx.fillStyle = "#e0a23a";
+      ctx.beginPath();
+      ctx.moveTo(12, -3); ctx.lineTo(19, -1); ctx.lineTo(12, 1); ctx.closePath();
+      ctx.fill();
+      // eye
+      ctx.fillStyle = "#fff";
+      ctx.beginPath(); ctx.arc(9, -4, 1.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = "#1a0f2a";
+      ctx.beginPath(); ctx.arc(9.3, -4, 0.8, 0, Math.PI * 2); ctx.fill();
+      // flapping wing
+      ctx.fillStyle = "#5a4a8a";
+      const wf = Math.sin(this.flap) * 9;
+      ctx.beginPath();
+      ctx.moveTo(-1, -1);
+      ctx.quadraticCurveTo(-8, -9 - wf, -15, -2 - wf * 0.3);
+      ctx.quadraticCurveTo(-8, 1, -1, 1);
+      ctx.closePath();
+      ctx.fill();
+      // tail
+      ctx.fillStyle = "#3a2c5c";
+      ctx.beginPath();
+      ctx.moveTo(-9, -1); ctx.lineTo(-16, -3); ctx.lineTo(-10, 2); ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+  Hex.SwoopBird = SwoopBird;
+
+  /* ===================== LEVEL 3 BOSS: THE GIANT BIRD ================== */
+  // A great raptor guarding its nest. It hovers high, swoops across the arena
+  // (side contact hurts Hexie), then briefly perches low with its head within
+  // reach. Stomp the head to damage it; each hit sends it into a 5-second
+  // head-shake stun (a safe window) before it resumes. Three hits and it falls.
+  const BOSS = {
+    intro: 1.5, hover: 1.2, swoop: 1.6, perch: 2.5, stunned: 5.0,
+  };
+
+  class BirdBoss {
+    constructor(arena) {
+      this.w = 150; this.h = 86;
+      this.homeCx = (arena && arena.width ? arena.width : 960) / 2;
+      this.hoverY = arena ? arena.hoverY : 90;
+      this.perchY = arena ? arena.perchY : 374;
+      this.x = this.homeCx - this.w / 2;
+      this.y = this.hoverY - 120;     // swoops in from above during intro
+      this.vy = 0;
+      this.hp = 3;
+      this.maxHp = 3;
+      this.dead = false;              // for symmetry; "defeated" state is canonical
+      this.state = "intro";
+      this.stateT = 0;
+      this.side = -1;                 // alternates swoop/perch direction
+      this.swoopFrom = 0; this.swoopTo = 0;
+      this.headShakeT = 0;
+      this.wing = 0; this.bob = M.rand(0, 6); this.tilt = 0;
+    }
+
+    get cx() { return this.x + this.w / 2; }
+    get cy() { return this.y + this.h / 2; }
+
+    // The stompable head region (top-front of the bird).
+    headRect() {
+      return { x: this.cx - 26, y: this.y, w: 52, h: 40 };
+    }
+
+    _setState(s) {
+      this.state = s;
+      this.stateT = 0;
+      if (s === "swoop") {
+        this.side = -this.side;
+        const a = 200, b = (this.homeCx * 2) - 200;
+        if (this.side < 0) { this.swoopFrom = a; this.swoopTo = b; }
+        else { this.swoopFrom = b; this.swoopTo = a; }
+        A.swoop();
+      } else if (s === "stunned") {
+        this.headShakeT = 0;
+      }
+    }
+
+    // Player landed on the head. Only vulnerable while perched.
+    hitHead(game) {
+      if (this.state !== "perch") return false;
+      this.hp--;
+      A.stomp();
+      game.cam.addShake(0.55);
+      game.addScore(300, this.cx, this.y + 8);
+      game.particles.burst(this.cx, this.y + 12, 24, {
+        color: ["#d8c8ff", "#fff", "#8a6a3a", "#ffd24d"], speedMin: 60, speedMax: 260,
+        lifeMin: 0.3, lifeMax: 0.8, glow: true, g: 400,
+      });
+      if (this.hp <= 0) {
+        this._setState("defeated");
+        this.vy = -220; this.dead = true;
+      } else {
+        this._setState("stunned");
+      }
+      return true;
+    }
+
+    hurtPlayer(player, game) {
+      return player.hurt(this.cx, game);
+    }
+
+    update(dt, arena, game) {
+      this.stateT += dt;
+      this.bob += dt * 2.4;
+      this.wing += dt * (this.state === "swoop" ? 18 : 9);
+
+      switch (this.state) {
+        case "intro": {
+          this.x = M.lerp(this.x, this.homeCx - this.w / 2, 0.06);
+          this.y = M.lerp(this.y, this.hoverY, 0.06);
+          this.tilt = M.lerp(this.tilt, 0, 0.1);
+          if (this.stateT >= BOSS.intro) this._setState("hover");
+          break;
+        }
+        case "hover": {
+          this.x = M.lerp(this.x, this.homeCx - this.w / 2, 0.08);
+          this.y = this.hoverY + Math.sin(this.bob) * 8;
+          // lean toward the swoop side as a telegraph in the last beat
+          const tele = this.stateT > BOSS.hover - 0.4 ? this.side * 0.25 : 0;
+          this.tilt = M.lerp(this.tilt, tele, 0.15);
+          if (this.stateT >= BOSS.hover) this._setState("swoop");
+          break;
+        }
+        case "swoop": {
+          const u = M.clamp(this.stateT / BOSS.swoop, 0, 1);
+          const cx = M.lerp(this.swoopFrom, this.swoopTo, u);
+          this.x = cx - this.w / 2;
+          this.y = this.hoverY + Math.sin(u * Math.PI) * (this.perchY - this.hoverY) * 1.15;
+          this.tilt = (this.swoopTo - this.swoopFrom > 0 ? 1 : -1) * 0.35 * Math.sin(u * Math.PI);
+          if (this.stateT >= BOSS.swoop) this._setState("perch");
+          break;
+        }
+        case "perch": {
+          // settle at an edge with the head low + reachable
+          const px = this.side < 0 ? 260 : (this.homeCx * 2) - 260;
+          this.x = M.lerp(this.x, px - this.w / 2, 0.2);
+          this.y = M.lerp(this.y, this.perchY, 0.25);
+          this.tilt = M.lerp(this.tilt, 0, 0.2);
+          if (this.stateT >= BOSS.perch) this._setState("hover");
+          break;
+        }
+        case "stunned": {
+          this.headShakeT += dt;
+          this.y = this.perchY + Math.sin(this.bob * 1.5) * 3;
+          this.tilt = Math.sin(this.headShakeT * 26) * 0.12;
+          if (this.stateT >= BOSS.stunned) this._setState("hover");
+          break;
+        }
+        case "defeated": {
+          this.vy += 1200 * dt;
+          this.y += this.vy * dt;
+          this.tilt += dt * 1.6;
+          if (Math.random() < 0.6) {
+            game.particles.spawn({
+              x: this.cx + M.rand(-40, 40), y: this.cy + M.rand(-20, 20),
+              vx: M.rand(-40, 40), vy: M.rand(-20, 60), g: 200,
+              life: M.rand(0.4, 0.9), size: M.rand(2, 4),
+              color: ["#d8c8ff", "#8a6a3a", "#fff"][M.randInt(0, 2)], glow: true,
+            });
+          }
+          break;
+        }
+      }
+    }
+
+    draw(ctx) {
+      const cx = this.cx;
+      const bodyY = this.y + 50;
+      ctx.save();
+      ctx.translate(cx, bodyY);
+      ctx.rotate(this.tilt);
+
+      const stunned = this.state === "stunned";
+      const facing = this.side < 0 ? -1 : 1;
+
+      // --- wings (behind body) ---
+      const wf = Math.sin(this.wing) * (this.state === "swoop" ? 26 : 14);
+      ctx.fillStyle = "#1d2a3a";
+      for (const dir of [-1, 1]) {
+        ctx.beginPath();
+        ctx.moveTo(0, -6);
+        ctx.quadraticCurveTo(dir * 60, -30 - wf, dir * 96, 6 - wf * 0.5);
+        ctx.quadraticCurveTo(dir * 60, 18, 0, 14);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // --- body ---
+      ctx.fillStyle = "#2c3a52";
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 52, 34, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // breast highlight
+      ctx.fillStyle = "#3b4d6b";
+      ctx.beginPath();
+      ctx.ellipse(facing * 8, 6, 34, 24, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // --- tail ---
+      ctx.fillStyle = "#1d2a3a";
+      ctx.beginPath();
+      ctx.moveTo(-facing * 40, 4);
+      ctx.lineTo(-facing * 78, -8);
+      ctx.lineTo(-facing * 78, 16);
+      ctx.closePath();
+      ctx.fill();
+
+      // talons
+      ctx.strokeStyle = "#c98a3a";
+      ctx.lineWidth = 4; ctx.lineCap = "round";
+      for (const tx of [-14, 14]) {
+        ctx.beginPath();
+        ctx.moveTo(tx, 30); ctx.lineTo(tx, 40);
+        ctx.stroke();
+      }
+
+      // --- neck + head group (head sits near the top of the AABB) ---
+      ctx.save();
+      // head center, relative to bodyY, is at (~facing*10, this.y-bodyY+20)
+      const headLocalY = (this.y - bodyY) + 18;
+      const headLocalX = facing * 10;
+      // head-shake wobble while stunned
+      ctx.translate(headLocalX, headLocalY);
+      if (stunned) ctx.rotate(Math.sin(this.headShakeT * 30) * 0.5);
+      // neck
+      ctx.strokeStyle = "#2c3a52";
+      ctx.lineWidth = 16; ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(0, 30); ctx.lineTo(0, 6);
+      ctx.stroke();
+      // head
+      ctx.fillStyle = "#2c3a52";
+      ctx.beginPath();
+      ctx.arc(0, 0, 16, 0, Math.PI * 2);
+      ctx.fill();
+      // crest feathers
+      ctx.fillStyle = "#1d2a3a";
+      ctx.beginPath();
+      ctx.moveTo(-6, -12); ctx.lineTo(-14, -26); ctx.lineTo(0, -14);
+      ctx.lineTo(12, -28); ctx.lineTo(6, -10); ctx.closePath();
+      ctx.fill();
+      // hooked beak
+      ctx.fillStyle = "#e0a23a";
+      ctx.beginPath();
+      ctx.moveTo(facing * 10, -2);
+      ctx.lineTo(facing * 30, 2);
+      ctx.lineTo(facing * 12, 8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = "#c07f24";
+      ctx.beginPath();
+      ctx.moveTo(facing * 22, 3); ctx.lineTo(facing * 30, 2); ctx.lineTo(facing * 24, 7);
+      ctx.closePath();
+      ctx.fill();
+      // glowing eye(s)
+      if (stunned) {
+        // dizzy "x" eyes during the shake
+        ctx.strokeStyle = "#ffd24d"; ctx.lineWidth = 2;
+        for (const ex of [facing * 4, facing * 12]) {
+          ctx.beginPath();
+          ctx.moveTo(ex - 3, -6); ctx.lineTo(ex + 3, 0);
+          ctx.moveTo(ex + 3, -6); ctx.lineTo(ex - 3, 0);
+          ctx.stroke();
+        }
+      } else {
+        ctx.save();
+        ctx.shadowColor = "#ff5a3d"; ctx.shadowBlur = 12;
+        ctx.fillStyle = "#ffb14d";
+        ctx.beginPath();
+        ctx.arc(facing * 6, -3, 3.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = "#2a0e00";
+        ctx.beginPath();
+        ctx.arc(facing * 6, -3, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();   // head group
+
+      ctx.restore();   // bird
+    }
+  }
+  Hex.BirdBoss = BirdBoss;
 })(window);

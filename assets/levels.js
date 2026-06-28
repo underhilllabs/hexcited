@@ -158,6 +158,131 @@
     };
   }
 
+  /* ========================= LEVEL 3a — THE CLIMB ===================== */
+  // A VERTICAL climb up a giant tree. Same level-object shape as level 1
+  // (solids / oneWay branches), just very tall with the goal at the TOP
+  // (goalY) instead of the right (goalX).
+  //
+  // IMPORTANT — reachability: Hexie's max jump is ~91px (measured), so every
+  // branch must sit no more than ~80px above the one below it, and the trunk
+  // is DECORATIVE (not a solid) so the cat can zig-zag freely between branches.
+  const BRANCH_GAP_MIN = 68, BRANCH_GAP_MAX = 80;   // < 91px jump, with margin
+  const NEST_GAP = 78;
+
+  function buildLevel3a() {
+    const height = 1800;
+    const groundY = height - 80;          // 1720 — foot of the tree
+    const trunkX = VIEW_W / 2 - 35;       // trunk metadata (decorative only)
+    const trunkW = 70;
+
+    const solids = [];
+    // foot of the tree — solid ground slab
+    solids.push({ x: -200, y: groundY, w: VIEW_W + 400, h: 200 });
+
+    // branches — a gentle zig-zag up a central lane. Small left/right offset
+    // keeps a big horizontal overlap so each branch is an easy hop from the
+    // last. All oneWay so the cat jumps up THROUGH one and lands on top.
+    const branches = [];
+    let side = -1;
+    let y = groundY - 80;                 // first branch within a single jump
+    while (y > 360) {
+      const w = 170;
+      const cx = VIEW_W / 2 + side * 45;  // ±45 offset → ~80px overlap
+      const b = { x: cx - w / 2, y, w, h: 18, oneWay: true };
+      solids.push(b);
+      branches.push(b);
+      side = -side;
+      y -= M.rand(BRANCH_GAP_MIN, BRANCH_GAP_MAX);
+    }
+
+    // nest landing at the very top — standing here ends the climb. Placed a
+    // single jump above the highest branch (full width, oneWay).
+    const topY = branches[branches.length - 1].y;
+    const nestY = topY - NEST_GAP;
+    solids.push({ x: 0, y: nestY, w: VIEW_W, h: 18, oneWay: true });
+
+    // pumpkins on alternating branches
+    const pumpkins = [];
+    branches.forEach((b, idx) => {
+      if (idx % 2 === 0)
+        pumpkins.push(new Hex.Pumpkin(b.x + b.w / 2 - 11, b.y - 30));
+    });
+
+    // swoop birds — nest off to the side every few branches and dive across
+    // the climbing lane to harry Hexie. Alternate which edge they roost on so
+    // attacks come from both directions as the cat ascends.
+    const enemies = [];
+    branches.forEach((b, idx) => {
+      if (idx >= 2 && idx % 3 === 2) {
+        const left = idx % 6 === 2;
+        const ex = left ? 120 : VIEW_W - 146;
+        enemies.push(new Hex.SwoopBird(ex, b.y - 70, { face: left ? 1 : -1 }));
+      }
+    });
+
+    // decorative foliage clumps (non-collidable) along the trunk
+    const props = [];
+    for (let py = groundY - 120; py > nestY + 40; py -= M.rand(150, 230)) {
+      props.push({ x: VIEW_W / 2 + (Math.random() < 0.5 ? -95 : 95),
+        y: py, type: "leaf", s: M.rand(0.8, 1.4), flip: Math.random() < 0.5 });
+    }
+
+    return {
+      width: VIEW_W,
+      height,
+      groundY,
+      trunk: { x: trunkX, w: trunkW },
+      solids, pumpkins, enemies, props,
+      wendy: null,
+      spawn: { x: 200, y: groundY - 40 },
+      // reaching the nest landing (p.y ≈ nestY-30) trips the goal; the highest
+      // branch (p.y ≈ topY-30) sits safely below it.
+      goalY: nestY + 20,
+      stars: makeStars(120, VIEW_W, height),
+      farStars: makeStars(70, VIEW_W, height),
+      moonX: 760, moonY: 150,
+    };
+  }
+
+  /* ========================= LEVEL 3b — THE NEST ====================== */
+  // A single-screen boss arena (the nest). Fixed camera. The giant bird boss
+  // is created separately in main.js; this just lays out the floor, ledges,
+  // the captive sister, and the bird's hover/perch altitudes.
+  function buildLevel3b() {
+    const groundY = 470;
+    const solids = [
+      { x: 0, y: groundY, w: VIEW_W, h: 80 },        // nest floor
+      { x: -40, y: -200, w: 40, h: VIEW_H + 200 },   // left containment wall
+      { x: VIEW_W, y: -200, w: 40, h: VIEW_H + 200 },// right containment wall
+      // twig ledges for height — kept within a single jump of the floor
+      // (~96px max) so Hexie can actually reach them, then the boss head.
+      { x: 150, y: 392, w: 150, h: 16, oneWay: true },
+      { x: 660, y: 392, w: 150, h: 16, oneWay: true },
+    ];
+
+    const pumpkins = [
+      new Hex.Pumpkin(210, 352),
+      new Hex.Pumpkin(720, 352),
+      new Hex.Pumpkin(VIEW_W / 2 - 11, 296),
+    ];
+
+    return {
+      width: VIEW_W,
+      height: VIEW_H,
+      groundY,
+      solids, pumpkins,
+      enemies: [],
+      props: [],
+      spawn: { x: VIEW_W / 2 - 17, y: groundY - 40 },
+      sister: { x: 80, y: groundY - 56 },
+      hoverY: 90,                 // boss hover altitude (head group sits here)
+      perchY: groundY - 96,       // boss perch altitude (head reachable)
+      stars: makeStars(100, VIEW_W, VIEW_H),
+      farStars: makeStars(50, VIEW_W, VIEW_H),
+      moonX: 480, moonY: 90,
+    };
+  }
+
   /* ===================== PARALLAX BACKGROUND DRAW ====================== */
   // Drawn in SCREEN space (not affected by camera translate) using camX to
   // offset each layer by a different factor.
@@ -262,12 +387,16 @@
     },
   };
 
-  Hex.Levels = { buildLevel1, buildLevel2, BG, GROUND_Y, VIEW_W, VIEW_H,
+  Hex.Levels = { buildLevel1, buildLevel2, buildLevel3a, buildLevel3b,
+    BG, GROUND_Y, VIEW_W, VIEW_H,
     L1_PALETTE: [
       [0, "#1a0e2e"], [0.45, "#3a1a52"], [0.78, "#7a3a6a"], [1, "#c25a4a"],
     ],
     L2_PALETTE: [
       [0, "#0b1030"], [0.4, "#1e2a6a"], [0.72, "#5a3a8a"], [1, "#c25a8a"],
+    ],
+    L3_PALETTE: [
+      [0, "#06121a"], [0.4, "#0d2233"], [0.72, "#234a44"], [1, "#3a6e52"],
     ],
   };
 })(window);

@@ -163,6 +163,16 @@
                "C5", "E5", "G5", "E5", "A4", "C5", "E5", "G5"],
         arp: true,
       },
+      // "Night on Bald Mountain" — Mussorgsky's agitated D-minor theme,
+      // transcribed into the chiptune step format (sharps only; A# = B-flat).
+      level3: {
+        tempo: 138,
+        bass: ["D2", "D2", "A2", "D2", "D2", "D2", "A2", "D2",
+               "A#1", "A#1", "F2", "A#1", "A1", "A1", "E2", "A1"],
+        lead: ["A4", "A4", "G4", "A4", "A4", "G4", "A4", "F4",
+               "D4", "F4", "A4", "D5", "A4", "F4", "E4", null],
+        arp: true,
+      },
     },
 
     noteFreq(n) {

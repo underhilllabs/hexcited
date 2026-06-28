@@ -110,7 +110,7 @@ test.describe("Level 2 — Sky Escape", () => {
 
     await killBroom(page);
     await expect(page.locator("#gameover")).toBeVisible();
-    expect(await page.evaluate(() => window.Hex.Game._lastLevel)).toBe(2);
+    expect(await page.evaluate(() => window.Hex.Game._lastLevel)).toBe("2");
     // Game Over screen itself must keep ticking, not freeze, and show the sky.
     await expectLoopAlive(page);
     await expectLevel2Sky(page);
