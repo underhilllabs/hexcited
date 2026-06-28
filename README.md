@@ -10,6 +10,11 @@ browser via the Web Audio API.
 > graveyard, take to the skies on Wendy's broom and soar over the rainbow — then
 > climb the great tree and face the giant bird guarding its nest.
 
+## Level 1: the Graveyard
+
+<img width="2509" height="1236" alt="image" src="https://github.com/user-attachments/assets/caf26779-7c54-4d81-90eb-e42a30098630" />
+
+
 
 ## Level 2 screenshot
 
