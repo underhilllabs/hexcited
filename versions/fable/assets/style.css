@@ -1,0 +1,27 @@
+/* Hexcited — Hexie's Rescue */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  background: radial-gradient(120% 120% at 50% 20%, #221436 0%, #120a1e 55%, #07040d 100%);
+  overflow: hidden;
+}
+
+#stage {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#game {
+  width: min(100vw, calc(100vh * (16 / 9)));
+  height: min(100vh, calc(100vw * (9 / 16)));
+  display: block;
+  border-radius: 6px;
+  box-shadow:
+    0 0 0 1px rgba(160, 120, 255, 0.25),
+    0 0 60px rgba(120, 60, 220, 0.28),
+    0 24px 80px rgba(0, 0, 0, 0.7);
+  background: #07040d;
+}
