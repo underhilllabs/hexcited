@@ -151,10 +151,13 @@
     deco(G, 'trunk', 0, -60, { x: 388, y: -60, w: 184, h: LH - 130 });
 
     const r = U.seeded(99);
-    let y = 4490;
+    // rungs anchored at both ends with even ~101px spacing — Hexie's true jump
+    // apex is ~129px at 60Hz, so every hop keeps a comfortable margin
+    const bottom = 4490, topRung = 660;
+    const n = Math.round((bottom - topRung) / 100);
     let side = 1;
-    let count = 0;
-    while (y > 640) {
+    for (let k = 0; k <= n; k++) {
+      const y = Math.round(bottom - ((bottom - topRung) * k) / n);
       const w = 155 + r() * 80;
       let s;
       if (side > 0) s = oneway(G, 468, y, w, 'branch', 1);
@@ -162,24 +165,26 @@
       // pumpkins on some branches
       if (r() < 0.45) pump(G, s.x + s.w * (0.35 + r() * 0.4), y - 24);
       // occasional far ledge near the wall with a bonus cluster
-      if (count % 5 === 3) {
+      if (k % 5 === 3) {
         const lw = 110 + r() * 40;
         const lx = side > 0 ? 30 : 930 - 30 - lw;
-        const ledge = oneway(G, lx, y - 40, lw, 'branch', side > 0 ? -1 : 1);
-        ledge.dir = side > 0 ? 1 : -1; // free-floating look
+        oneway(G, lx, y - 40, lw, 'branch', side > 0 ? 1 : -1);
         pumpRow(G, lx + 16, 3, (lw - 32) / 2, y - 66);
         deco(G, 'leaves', lx + lw / 2, y - 90);
       }
-      if (count % 4 === 2) deco(G, 'leaves', 480 + (r() - 0.5) * 240, y - 30);
-      y -= 96 + r() * 18;
+      if (k % 4 === 2) deco(G, 'leaves', 480 + (r() - 0.5) * 240, y - 30);
       side = -side;
-      count++;
     }
-    // approach branches to the nest
+    // approach branches under the nest…
     oneway(G, 468, 560, 190, 'branch', 1);
     oneway(G, 300, 565, 192, 'branch', -1);
     pump(G, 560, 536);
     pump(G, 390, 541);
+    // …and step branches beside the rim so the final hop is an easy ~65px
+    oneway(G, 645, 495, 165, 'branch', 1);
+    oneway(G, 150, 500, 160, 'branch', -1);
+    pump(G, 727, 471);
+    pump(G, 230, 476);
 
     // the nest (solid top — the boss arena floor)
     solid(G, 330, 430, 300, 42, 'nest');

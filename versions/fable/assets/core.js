@@ -51,6 +51,8 @@
     Enter: 'confirm', NumpadEnter: 'confirm',
     KeyP: 'pause',
     KeyM: 'mute',
+    KeyH: 'hiscores',
+    Backspace: 'back',
     Digit1: 'lvl1', Numpad1: 'lvl1',
     Digit2: 'lvl2', Numpad2: 'lvl2',
     Digit3: 'lvl3', Numpad3: 'lvl3',
@@ -59,11 +61,14 @@
   HX.Input = {
     held: Object.create(null),
     hit: Object.create(null),
+    typed: [], // raw characters this frame, for the initials entry screen
     init() {
       window.addEventListener('keydown', (e) => {
         const a = KEYMAP[e.code];
         if (a) e.preventDefault();
         if (HX.Audio) HX.Audio.unlock(); // audio needs a user gesture
+        if (e.key.length === 1 && !e.repeat && /[a-z0-9]/i.test(e.key))
+          this.typed.push(e.key.toUpperCase());
         if (!a || e.repeat) return;
         this.held[a] = true;
         this.hit[a] = true;
@@ -78,6 +83,6 @@
     },
     down(a) { return !!this.held[a]; },
     pressed(a) { return !!this.hit[a]; },
-    endFrame() { this.hit = Object.create(null); },
+    endFrame() { this.hit = Object.create(null); this.typed.length = 0; },
   };
 })();

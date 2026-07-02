@@ -20,6 +20,10 @@
     deathHandled: false,
     swoopTimer: 3.5,
     rescueFlags: {},
+    shortcutUsed: false, // 1/2/3 level jumps disqualify the run from the table
+    pendingRank: -1,     // highlight row on the hiscores screen (-1 = none)
+    entryInitials: null,
+    entryCursor: 0,
   });
 
   /* ================================================= boot & loop */
@@ -88,6 +92,7 @@
     G.score = 0;
     G.pumps = 0;
     G.lives = 3;
+    G.shortcutUsed = false;
     startLevel(0);
   }
 
@@ -128,7 +133,7 @@
     G.stateT += dt;
     A.tick();
 
-    if (I.pressed('mute')) A.toggleMute();
+    if (I.pressed('mute') && G.state !== 'initials') A.toggleMute();
 
     // 1/2/3 — jump straight to a level
     const jumps = [['lvl1', 0], ['lvl2', 1], ['lvl3', 2]];
@@ -138,6 +143,7 @@
         A.resume();
         A.sfx('select');
         if (G.state === 'title' || G.state === 'gameover') { G.score = 0; G.pumps = 0; G.lives = 3; }
+        G.shortcutUsed = true;
         startLevel(idx);
         return;
       }
@@ -145,7 +151,11 @@
 
     switch (G.state) {
       case 'title':
-        if (I.pressed('confirm')) {
+        if (I.pressed('hiscores')) {
+          A.sfx('select');
+          G.pendingRank = -1;
+          setState('hiscores');
+        } else if (I.pressed('confirm')) {
           A.sfx('select');
           newRun();
         }
@@ -184,10 +194,62 @@
       case 'win':
         if (I.pressed('confirm')) {
           A.sfx('select');
-          setState('title');
-          A.playMusic('title');
+          if (!G.shortcutUsed && HX.Scores.qualifies(G.score)) {
+            G.entryInitials = [null, null, null];
+            G.entryCursor = 0;
+            setState('initials');
+          } else {
+            setState('title');
+            A.playMusic('title');
+          }
         }
         break;
+      case 'initials':
+        updateInitials();
+        break;
+      case 'hiscores':
+        if (I.pressed('confirm') || I.pressed('hiscores')) {
+          A.sfx('select');
+          const fromWin = G.pendingRank >= 0;
+          G.pendingRank = -1;
+          setState('title');
+          if (fromWin) A.playMusic('title'); // title visits already have it playing
+        }
+        break;
+    }
+  }
+
+  const AZ = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  function updateInitials() {
+    const slots = G.entryInitials;
+    if (I.typed.length) {
+      // a typed letter may also be a mapped key (A/D/W/S…) — it only types here
+      for (const ch of I.typed) {
+        slots[G.entryCursor] = ch;
+        G.entryCursor = Math.min(2, G.entryCursor + 1);
+        A.sfx('collect');
+      }
+    } else {
+      if (I.pressed('left') && G.entryCursor > 0) { G.entryCursor--; A.sfx('collect'); }
+      if (I.pressed('right') && G.entryCursor < 2) { G.entryCursor++; A.sfx('collect'); }
+      const spin = (I.pressed('up') ? 1 : 0) - (I.pressed('down') ? 1 : 0);
+      if (spin) {
+        const cur = slots[G.entryCursor];
+        const i = cur ? AZ.indexOf(cur) : (spin > 0 ? -1 : 1);
+        slots[G.entryCursor] = AZ[(i + spin + 26) % 26];
+        A.sfx('collect');
+      }
+      if (I.pressed('back')) {
+        if (slots[G.entryCursor]) slots[G.entryCursor] = null;
+        else if (G.entryCursor > 0) slots[--G.entryCursor] = null;
+        A.sfx('collect');
+      }
+    }
+    if (I.pressed('confirm') && slots.some((c) => c)) {
+      const initials = slots.map((c) => c || '·').join('');
+      G.pendingRank = HX.Scores.insert(initials, G.score, G.pumps);
+      A.sfx('select');
+      setState('hiscores');
     }
   }
 
@@ -255,11 +317,13 @@
           if (P.hurt(e.x, G)) e.knock();
         } else if (e.stompable && P.vy > 0 && P.prevBottom <= eb.y + e.h * 0.55) {
           e.stomp();
-          G.score += 200;
+          // swoop-birds dive fast and never hold still — worth double
+          const pts = e instanceof HX.Swooper ? 400 : 200;
+          G.score += pts;
           A.sfx('stomp');
           FX.dust(e.x, eb.y + e.h, 8);
           FX.burst(e.x, et + 6, 6, { speed: 110, life: 0.5, size: 3, color: '#c8c2d8', type: 'spark' });
-          FX.addText(e.x, et - 10, '+200');
+          FX.addText(e.x, et - 10, '+' + pts);
           FX.shake(3, 0.12);
           FX.hit(0.05);
           P.vy = (I.down('jump') || I.down('up')) ? -800 : -500;
@@ -436,6 +500,8 @@
         if (G.state === 'gameover') renderGameOver(ctx);
         break;
       case 'win': renderWin(ctx); break;
+      case 'initials': renderInitials(ctx); break;
+      case 'hiscores': renderHiscores(ctx); break;
     }
   }
 
@@ -555,7 +621,7 @@
     txt(ctx, 'Her loyal cat Hexie must get her back!', W / 2, 274, 17, 'rgba(240,232,255,0.92)');
 
     txt(ctx, '← → / A D  move      SPACE  jump (hold for higher)', W / 2, 322, 15, 'rgba(200,190,230,0.85)');
-    txt(ctx, 'P  pause      M  mute      1 / 2 / 3  jump to level', W / 2, 346, 15, 'rgba(200,190,230,0.85)');
+    txt(ctx, 'P  pause      M  mute      H  high scores      1 / 2 / 3  jump to level', W / 2, 346, 15, 'rgba(200,190,230,0.85)');
     txt(ctx, 'Stomp enemies from above. Collect the mini pumpkins!', W / 2, 370, 15, 'rgba(200,190,230,0.85)');
 
     if (Math.floor(G.t * 1.6) % 2 === 0)
@@ -636,6 +702,90 @@
 
     txt(ctx, 'FINAL SCORE  ' + G.score, W / 2, 452, 26, '#8affc1');
     txt(ctx, G.pumps + ' mini pumpkins collected', W / 2, 482, 16, 'rgba(240,232,255,0.85)');
+    const highScore = !G.shortcutUsed && HX.Scores.qualifies(G.score);
+    if (highScore) {
+      const pop = 1 + Math.sin(G.t * 5) * 0.06;
+      ctx.save();
+      ctx.translate(W / 2 - 210, 444);
+      ctx.rotate(-0.12);
+      ctx.scale(pop, pop);
+      txtGlow(ctx, 'NEW HIGH SCORE!', 0, 0, 22, '#ffd66e', '#ff9a3d');
+      ctx.restore();
+    }
+    if (Math.floor(G.t * 1.6) % 2 === 0)
+      txt(ctx, highScore ? 'PRESS ENTER TO ENTER YOUR INITIALS' : 'PRESS ENTER FOR TITLE',
+        W / 2, 516, 17, '#ffd66e');
+    Art.vignette(ctx);
+  }
+
+  function renderInitials(ctx) {
+    fakeCamBG(ctx);
+    ctx.fillStyle = 'rgba(8,4,16,0.7)';
+    ctx.fillRect(0, 0, W, H);
+    txtGlow(ctx, 'NEW HIGH SCORE!', W / 2, 130, 48, '#ffd66e', '#ff9a3d');
+    txt(ctx, 'SCORE ' + G.score + '   ·   ' + G.pumps + ' pumpkins', W / 2, 172, 18, 'rgba(240,232,255,0.92)');
+    txt(ctx, 'ENTER YOUR INITIALS', W / 2, 232, 20, '#c9a9ff');
+
+    const slotW = 76, gap = 26, x0 = W / 2 - (slotW * 3 + gap * 2) / 2;
+    for (let i = 0; i < 3; i++) {
+      const x = x0 + i * (slotW + gap);
+      const active = i === G.entryCursor;
+      ctx.save();
+      if (active) { ctx.shadowColor = '#8a5cf5'; ctx.shadowBlur = 24; }
+      ctx.fillStyle = active ? 'rgba(80,55,140,0.55)' : 'rgba(40,28,70,0.55)';
+      U.rr(ctx, x, 268, slotW, 92, 10);
+      ctx.fill();
+      ctx.strokeStyle = active ? '#c9a9ff' : 'rgba(150,130,200,0.5)';
+      ctx.lineWidth = active ? 3 : 2;
+      U.rr(ctx, x, 268, slotW, 92, 10);
+      ctx.stroke();
+      ctx.restore();
+      const ch = G.entryInitials[i];
+      if (ch) txtGlow(ctx, ch, x + slotW / 2, 336, 54, '#fff2d8', '#ffd66e');
+      if (active && Math.floor(G.t * 2.4) % 2 === 0)
+        txt(ctx, '_', x + slotW / 2, 348, 44, '#8affc1');
+    }
+
+    txt(ctx, 'TYPE A–Z      ← → move      ↑ ↓ spin letter      BACKSPACE erase', W / 2, 420, 15, 'rgba(200,190,230,0.85)');
+    if (Math.floor(G.t * 1.6) % 2 === 0)
+      txtGlow(ctx, 'PRESS ENTER TO SAVE', W / 2, 470, 22, '#8affc1', '#2fbf71');
+    Art.vignette(ctx);
+  }
+
+  function renderHiscores(ctx) {
+    fakeCamBG(ctx);
+    ctx.fillStyle = 'rgba(8,4,16,0.7)';
+    ctx.fillRect(0, 0, W, H);
+    txtGlow(ctx, 'HIGH SCORES', W / 2, 92, 44, '#c9a9ff', '#8a5cf5');
+    Art.pumpkin(ctx, W / 2 - 190, 82, G.t, 1.1);
+    Art.pumpkin(ctx, W / 2 + 190, 82, G.t + 2, 1.1);
+
+    const list = HX.Scores.list;
+    if (!list.length) {
+      txt(ctx, 'NO SCORES YET — GO RESCUE WENDY!', W / 2, H / 2, 22, 'rgba(240,232,255,0.9)');
+    } else {
+      const rowH = 34, y0 = 148;
+      for (let i = 0; i < list.length; i++) {
+        const e = list[i], y = y0 + i * rowH;
+        const mine = i === G.pendingRank;
+        if (mine) {
+          ctx.save();
+          ctx.shadowColor = '#ffd66e';
+          ctx.shadowBlur = 18;
+          ctx.fillStyle = 'rgba(255,214,110,0.14)';
+          U.rr(ctx, W / 2 - 240, y - 22, 480, 30, 8);
+          ctx.fill();
+          ctx.restore();
+        }
+        const c = mine ? '#ffd66e' : i === 0 ? '#ffe9b0' : 'rgba(235,225,255,0.9)';
+        txt(ctx, (i + 1) + '.', W / 2 - 210, y, 19, c, 'right');
+        txt(ctx, e.initials, W / 2 - 130, y, 19, c);
+        txt(ctx, String(e.score), W / 2 + 120, y, 19, c, 'right');
+        Art.pumpkin(ctx, W / 2 + 158, y - 6, 0, 0.55);
+        txt(ctx, '× ' + e.pumps, W / 2 + 172, y, 14, 'rgba(255,217,160,0.8)', 'left');
+      }
+    }
+
     if (Math.floor(G.t * 1.6) % 2 === 0)
       txt(ctx, 'PRESS ENTER FOR TITLE', W / 2, 516, 17, '#ffd66e');
     Art.vignette(ctx);
